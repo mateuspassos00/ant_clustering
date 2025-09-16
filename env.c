@@ -5,14 +5,15 @@
 item *create_items(int num_itens, const char *path/*, int data_dim*/) {
     item *items = (item*) malloc(num_itens * sizeof(item));
     
-    FILE *fp = fopen64("base_4_grupos_sem_label.csv", "rt");
+    FILE *fp = fopen64(path, "rt");
     if(fp == NULL) perror("erro ao abrir arquivo de dados");
     
+    int type_temp;
     for(int i = 0; i < num_itens; i++) {        
         items[i].carried = NULL;
         items[i].pos = (position*) malloc(sizeof(position));
-        fscanf(fp, "%f,%f,%d\n", &items[i].data[0], &items[i].data[1], &items[i].type);
-        items[i].type--; // labels: 1, 2, 3, 4.. enum: 0, 1, 2, 3..
+        fscanf(fp, "%f,%f,%d\n", &items[i].data[0], &items[i].data[1], &type_temp);
+        items[i].type = (enum item_type) (type_temp - 1); // labels: 1, 2, 3, 4.. enum: 0, 1, 2, 3..        
     }
 
     fclose(fp);
@@ -49,33 +50,12 @@ cell **create_map(int rows, int cols) {
     return m;
 }
 
-env *create_env(int rows, int cols, int num_ants, int num_items, int ant_los, float k_1, float k_2, float alpha, const char *path) {
-    env *e = (env*) malloc(sizeof(env));
-        
-    e->rows = rows;
-    e->cols = cols;
-    e->map = create_map(rows, cols);
-    
-    e->k_1 = k_1;
-    e->k_2 = k_2;
-    e->alpha = alpha;
-    
-    e->num_items = num_items;    
-    e->list_items = create_items(e->num_items, path);
-    
-    e->num_ants = num_ants;
-    e->list_ants = create_ants(e);
-    e->ant_los = ant_los;
-
-    return e;
-}
-
 int distribute_itens(env *env) {
     if(env == NULL) return -1;
     
     int items_placed = 0;
 
-    while(items_placed <= env->num_items) {
+    while(items_placed < env->num_items) {
         int x = rand() % env->cols;
         int y = rand() % env->rows;
         
@@ -97,10 +77,10 @@ int distribute_ants(env *env) {
     
     int ants_placed = 0;
 
-    while(ants_placed <= env->num_ants) {
+    while(ants_placed < env->num_ants) {
         int x = rand() % env->cols;
         int y = rand() % env->rows;
-        
+                
         if(env->map[x][y].ant == NULL) {            
             env->map[x][y].ant = &env->list_ants[ants_placed];
 
@@ -112,6 +92,30 @@ int distribute_ants(env *env) {
     }            
     
     return 0;
+}
+
+env *create_env(int rows, int cols, int num_ants, int num_items, int ant_los, float k_1, float k_2, float alpha, const char *path) {
+    env *e = (env*) malloc(sizeof(env));
+        
+    e->rows = rows;
+    e->cols = cols;
+    e->map = create_map(rows, cols);
+    
+    e->k_1 = k_1;
+    e->k_2 = k_2;
+    e->alpha = alpha;
+    
+    e->num_items = num_items;    
+    e->list_items = create_items(e->num_items, path);
+    
+    e->num_ants = num_ants;
+    e->list_ants = create_ants(e);
+    e->ant_los = ant_los;
+
+    distribute_itens(e);
+    distribute_ants(e);
+
+    return e;
 }
 
 int print_env(env *e) {

@@ -53,7 +53,7 @@ typedef struct cell {
 
 // LF model
 typedef struct env {
-    int rows, cols, num_ants, num_items, ant_los, data_dim;
+    int rows, cols, num_ants, num_items, ant_los/*, data_dim*/;
     ant *list_ants;
     item *list_items;
     cell **map;
