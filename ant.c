@@ -18,7 +18,7 @@ item_list *check_items(ant *ant) {
             int x = (ant_pos->x + dx ) % env->cols;
             int y = (ant_pos->y + dy) % env->rows;
             
-            if (map[x][y].item && map[x][y].item->carried == NULL) {
+            if (map[x][y].item) {
                 nearby_items->size++;
                 nearby_items->items = realloc(
                     nearby_items->items,
@@ -33,14 +33,14 @@ item_list *check_items(ant *ant) {
 }
 
 float distance(item *i1, item *i2) {
-    float x_diff = i1->pos->x - i2->pos->x;
-    float y_diff = i1->pos->y - i2->pos->y;
+    float d0_diff = i1->data[0] - i2->data[0];
+    float d1_diff = i1->data[1] - i2->data[1];
 
-    float d = sqrtf(x_diff * x_diff + y_diff * y_diff);
+    float d = sqrtf(d0_diff * d0_diff + d1_diff * d1_diff);
     return d;
 }
 
-// f(x) E [0,1]
+// f(x) E [0,1] <-- VERIFICAR NORMALIZAÇÃO
 float f_function(ant* ant, item *item, item_list *nearby_items) {
     env* e = ant->env;
     int alpha = ant->env->alpha;
@@ -72,7 +72,7 @@ float prob_drop(ant *ant, item_list *nearby_items) {
     
     float k_2 = env->k_2;
     
-    float f = f_function(ant, ant->carry, nearby_items);
+    float f = f_function(ant, item, nearby_items);
     
     return f < k_2 ? 2 * f : 1;
 }
@@ -81,74 +81,46 @@ void drop_item(ant *ant) {
     env *env = ant->env;
     
     env->map[ant->pos->x][ant->pos->y].item = ant->carry; // célula ganha a referência do item
-    ant->carry->carried == NULL; // item 'deixa' de ser carregado (perde a referência da formiga)
+    ant->carry->pos->x = ant->pos->x; // posição do item abandonado passa a ser a (última) posição da formiga
+    ant->carry->pos->y = ant->pos->y;
     ant->carry = NULL; // formiga perde a referência do item
 }
 
 void pick_up_item(ant *ant, item *candidate) {
-    ant->carry = candidate;
-    candidate->carried = ant;
+    ant->carry = candidate;    
 }
 
 int move(ant *ant) {    
     if(ant == NULL) return -1;
 
-    env *env = ant->env;
-    cell **map = env->map;
+    env *env = ant->env;    
     item *carrying = ant->carry;
-
-    map[ant->pos->x][ant->pos->y].ant = NULL; // formiga saiu da célula antiga
-    if(carrying) map[carrying->pos->x][carrying->pos->y].ant = NULL; // idem para o item (caso estiver carregando)
     
     ant->next_dir = rand() % sizeof(enum direcao);
     switch(ant->next_dir) {
         case UP: 
-            ant->pos->x = (ant->pos->x - 1) % ant->env->rows; // atualizar a posição da formiga            
-            if(carrying) carrying->pos->x - 1; // atualizar a posição do item (caso estiver carregando algo)
+            ant->pos->x = (ant->pos->x - 1) % env->rows; // atualizar a posição da formiga            
             break;
         case DOWN: 
-            ant->pos->x = (ant->pos->x + 1) % ant->env->rows;
-            if(carrying) carrying->pos->x + 1;
+            ant->pos->x = (ant->pos->x + 1) % env->rows;            
             break;
         case LEFT: 
-            ant->pos->y = (ant->pos->y - 1) % ant->env->rows;
-            if(carrying) carrying->pos->y - 1;
+            ant->pos->y = (ant->pos->y - 1) % env->rows;            
             break;
         case RIGHT:
-            ant->pos->y = (ant->pos->y + 1) % ant->env->rows;
-            if(carrying) carrying->pos->y + 1;
+            ant->pos->y = (ant->pos->y + 1) % env->rows;            
             break;
     }
-
-    map[ant->pos->x][ant->pos->y].ant = ant; // atualizar a célula no mapa
-    if(carrying) map[carrying->pos->x][carrying->pos->y].item = carrying; // idem para o item (caso estiver carregando)
-
-    /*
-     - Caso a formiga esteja carregando algo:
-        - Verifica a probabilidade de largar,
-            - Se for maior do que 70%, (????)
-                - Larga na mesma célula;
-                - Atualiza posição do item no mapa;
-            - Se não, a formiga continua se deslocando,
-                - Atualiza posição do item no mapa;
-     
-    - Caso a formiga NÃO esteja carregando algo:
-        - Verifica se existem itens nas células adjacentes,
-            - Se sim, verifica as probabilidades de pegar cada item,
-                - Se todas as probabilidades forem inferiores a 70%, a formiga continua se deslocando;
-                - Caso contrário, pega o item com a maior probabilidade;
-            - Se não, a formiga continua se deslocando;    
-    */
 
     item_list *nearby_items = check_items(ant);
 
     if(nearby_items->size > 0) { // Caso não houver nenhum item ao redor, continua andando
         if(carrying && prob_drop(ant, nearby_items) > .7) drop_item(ant);
-        else if(carrying == NULL) {
-            float max_valid_prob = 0, prob;
+        else if(!carrying) {
+            float max_valid_prob = 0.7, prob;
             item *candidate = NULL;
             for(int i = 0; i < nearby_items->size; i++) {
-                if(prob = prob_pickup(ant, nearby_items->items[i], nearby_items) > .7 && prob > max_valid_prob) {
+                if((prob = prob_pickup(ant, nearby_items->items[i], nearby_items)) > max_valid_prob) {
                     max_valid_prob = prob;
                     candidate = nearby_items->items[i];
                 }
