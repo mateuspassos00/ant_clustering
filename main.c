@@ -4,8 +4,6 @@
 #include <time.h>
 #include "ant_clustering.h"
 
-#include <windows.h>
-
 #define ROWS 64
 #define COLS 64
 #define ITENS 400
@@ -16,7 +14,7 @@
 #define ITERATIONS 2000000
 #define LOS 1
 
-// PARA CASO HOMOGÊNEO, USAR REGRA RELACIONAL SIMPLES
+#define SNAPSHOTS 1
 
 int main(void) {
     srand(time(NULL));
@@ -25,18 +23,30 @@ int main(void) {
 
     env *e = create_env(ROWS, COLS, AGENTS, ITENS, LOS, K_1, K_2, ALPHA, "base_4_grupos.csv");
     if(e == NULL) perror("erro ao criar ambiente");
-
-    ret = print_env(e); assert(ret == 0);
     
-    // Move uma formiga e mostra o ambiente
-    for(int i = 0; i < ITERATIONS; i++) {
-        for(int i = 0; i < AGENTS; i++) {            
-            ret = move(&e->list_ants[i]); assert(ret == 0);
-            ret = print_env(e); assert(ret == 0);
-            Sleep(2000);
-            system("CLS");
+    ret = print_env_to_file(e, "start"); assert(ret == 0);
+    
+    if(SNAPSHOTS) {
+        for(int i = 0; i < ITERATIONS; i++) {
+            for(int i = 0; i < AGENTS; i++) {            
+                if(i == ITERATIONS / 4) ret = print_env_to_file(e, "q1"); assert(ret == 0);
+                if(i == ITERATIONS / 2) ret = print_env_to_file(e, "q2"); assert(ret == 0);
+                if(i == 3 * ITERATIONS / 4) ret = print_env_to_file(e, "q3"); assert(ret == 0);
+
+                ret = move(&e->list_ants[i]); assert(ret == 0);
+            }
         }
     }
+    
+    else {
+        for(int i = 0; i < ITERATIONS; i++) {
+            for(int i = 0; i < AGENTS; i++) {            
+                ret = move(&e->list_ants[i]); assert(ret == 0);
+            }
+        }
+    }
+
+    ret = print_env_to_file(e, "out"); assert(ret == 0);
     
     ret = destroy_env(e); assert(ret == 0);
 

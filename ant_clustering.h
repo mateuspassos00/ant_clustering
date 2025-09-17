@@ -63,6 +63,7 @@ typedef struct env {
 env *create_env(int rows, int cols, int num_ants, int num_items, int ant_los, float k_1, float k_2, float alpha, const char *path/*, int data_dim*/); // cria o ambiente distribuindo aleatoriamente itens e formigas
 int move(ant *a); // escolhe próxima direção aleatóriamente
 int print_env(env *env);
+int print_env_to_file(env *env, const char *path);
 int destroy_env(env *env);
 
 #endif

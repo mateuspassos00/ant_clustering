@@ -136,6 +136,29 @@ int print_env(env *e) {
     return 0;
 }
 
+int print_env_to_file(env *e, const char *path) {
+    if(e == NULL) return -1;
+
+    FILE *fp = fopen64(path, "wt");
+    if(!fp) perror("erro ao criar/abrir arquivo para printar mapa");
+    
+    fprintf(fp, "-------------------------------------------------------ANT CLUSTERING--------------------------------------------------------------\n");
+    for(int i = 0; i < e->rows; i++) {
+        fprintf(fp, "| ");
+        for(int j = 0; j < e->cols; j++) {            
+            if(e->map[i][j].item != NULL) {                
+                fprintf(fp, "%c ", (char) (e->map[i][j].item->type + 65));
+            } else fprintf(fp, ". ");            
+        }        
+        fprintf(fp, "|\n");
+    }
+    fprintf(fp, "-----------------------------------------------------------------------------------------------------------------------------------\n");
+
+    fclose(fp);
+
+    return 0;
+}
+
 void free_items(item *items, int num_items) {
     for(int i = 0; i < num_items; i++) free(items[i].pos);
     free(items);

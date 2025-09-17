@@ -3,6 +3,10 @@
 #include <math.h>
 #include "ant_clustering.h"
 
+int mod(int a, int b) {
+    return (a % b + b) % b;
+}
+
 item_list *check_items(ant *ant) {
     env *env = ant->env;
     cell **map = env->map;
@@ -15,8 +19,8 @@ item_list *check_items(ant *ant) {
     
     for (int dx = -r; dx <= r; dx++) { // 'varredura' centrada na célula da formiga
         for (int dy = -r; dy <= r; dy++) {
-            int x = (ant_pos->x + dx ) % env->cols;
-            int y = (ant_pos->y + dy) % env->rows;
+            int x = mod(ant_pos->x + dx, env->cols);
+            int y = mod(ant_pos->y + dy, env->rows);
             
             if (map[x][y].item) {
                 nearby_items->size++;
