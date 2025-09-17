@@ -11,7 +11,7 @@
 #define K_1 0.3 // [0,1]
 #define K_2 0.6 // [0,1]
 #define ALPHA 11.8029
-#define ITERATIONS 2000000
+#define ITERATIONS 12
 #define LOS 1
 
 int main(void) {

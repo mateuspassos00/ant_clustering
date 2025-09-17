@@ -23,12 +23,14 @@ item_list *check_items(ant *ant) {
             int y = mod(ant_pos->y + dy, env->rows);
             
             if (map[x][y].item) {
-                nearby_items->size++;
-                nearby_items->items = realloc(
-                    nearby_items->items,
-                    nearby_items->size * sizeof(item *)
-                );
-                nearby_items->items[nearby_items->size - 1] = map[x][y].item;
+                if(map[x][y].item->carried == NULL) {
+                    nearby_items->size++;
+                    nearby_items->items = realloc(
+                        nearby_items->items,
+                        nearby_items->size * sizeof(item *)
+                    );
+                    nearby_items->items[nearby_items->size - 1] = map[x][y].item;
+                }
             }
         }
     }
@@ -47,16 +49,16 @@ float distance(item *i1, item *i2) {
 // f(x) E [0,1] <-- VERIFICAR NORMALIZAÇÃO
 float f_function(ant* ant, item *item, item_list *nearby_items) {
     env* e = ant->env;
-    int alpha = ant->env->alpha;
+    float alpha = ant->env->alpha;
     int num_cells = 2 * e->ant_los + 1;
     num_cells *= num_cells;
     
-    float f = 1 / num_cells, sum = 0;
+    float f = 1.0 / num_cells, sum = 0;
     for(int i = 0; i < nearby_items->size; i++) {
-        if(item->pos != nearby_items->items[i]->pos) sum += (1 - distance(item, nearby_items->items[i]) / alpha);
+        sum += (1 - distance(item, nearby_items->items[i]) / alpha);
     }
 
-    f *= sum;
+    sum > 0 ? f *= sum : f;
     return f > 0 ? f : 0;
 }
 
@@ -87,11 +89,13 @@ void drop_item(ant *ant) {
     env->map[ant->pos->x][ant->pos->y].item = ant->carry; // célula ganha a referência do item
     ant->carry->pos->x = ant->pos->x; // posição do item abandonado passa a ser a (última) posição da formiga
     ant->carry->pos->y = ant->pos->y;
+    ant->carry->carried = NULL; // item perde a referência da formiga que o carrega
     ant->carry = NULL; // formiga perde a referência do item
 }
 
 void pick_up_item(ant *ant, item *candidate) {
-    ant->carry = candidate;    
+    ant->carry = candidate;
+    candidate->carried = ant;
 }
 
 int move(ant *ant) {    
@@ -103,34 +107,32 @@ int move(ant *ant) {
     ant->next_dir = rand() % sizeof(enum direcao);
     switch(ant->next_dir) {
         case UP: 
-            ant->pos->x = (ant->pos->x - 1) % env->rows; // atualizar a posição da formiga            
+            ant->pos->x = mod(ant->pos->x - 1, env->rows); // atualizar a posição da formiga            
             break;
         case DOWN: 
-            ant->pos->x = (ant->pos->x + 1) % env->rows;            
+            ant->pos->x = mod(ant->pos->x + 1, env->rows);
             break;
         case LEFT: 
-            ant->pos->y = (ant->pos->y - 1) % env->rows;            
+            ant->pos->y = mod(ant->pos->y - 1, env->cols);
             break;
         case RIGHT:
-            ant->pos->y = (ant->pos->y + 1) % env->rows;            
+            ant->pos->y = mod(ant->pos->y + 1, env->cols);
             break;
     }
 
     item_list *nearby_items = check_items(ant);
-
-    if(nearby_items->size > 0) { // Caso não houver nenhum item ao redor, continua andando
-        if(carrying && prob_drop(ant, nearby_items) > .7) drop_item(ant);
-        else if(!carrying) {
-            float max_valid_prob = 0.7, prob;
-            item *candidate = NULL;
-            for(int i = 0; i < nearby_items->size; i++) {
-                if((prob = prob_pickup(ant, nearby_items->items[i], nearby_items)) > max_valid_prob) {
-                    max_valid_prob = prob;
-                    candidate = nearby_items->items[i];
-                }
+    if(carrying) {
+        if (prob_drop(ant, nearby_items) > 0.5) drop_item(ant);
+    } else {
+        float max_valid_prob = 0.5, prob;
+        item *candidate = NULL;
+        for(int i = 0; i < nearby_items->size; i++) {
+            if((prob = prob_pickup(ant, nearby_items->items[i], nearby_items)) > max_valid_prob) {
+                max_valid_prob = prob;
+                candidate = nearby_items->items[i];
             }
-            if(candidate) pick_up_item(ant, candidate);
         }
+        if(candidate) pick_up_item(ant, candidate);
     }
 
     free(nearby_items->items);
