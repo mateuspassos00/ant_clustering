@@ -14,8 +14,6 @@
 #define ITERATIONS 2000000
 #define LOS 1
 
-#define SNAPSHOTS 1
-
 int main(void) {
     srand(time(NULL));
     
@@ -26,26 +24,16 @@ int main(void) {
     
     ret = print_env_to_file(e, "start"); assert(ret == 0);
     
-    if(SNAPSHOTS) {
-        for(int i = 0; i < ITERATIONS; i++) {
-            for(int i = 0; i < AGENTS; i++) {            
-                if(i == ITERATIONS / 4) ret = print_env_to_file(e, "q1"); assert(ret == 0);
-                if(i == ITERATIONS / 2) ret = print_env_to_file(e, "q2"); assert(ret == 0);
-                if(i == 3 * ITERATIONS / 4) ret = print_env_to_file(e, "q3"); assert(ret == 0);
+    for(long int i = 0; i < ITERATIONS; i++) {
+        for(int j = 0; j < AGENTS; j++) {            
+            if(i == (ITERATIONS / 4)) {ret = print_env_to_file(e, "q1"); assert(ret == 0);}
+            if(i == (ITERATIONS / 2)) {ret = print_env_to_file(e, "q2"); assert(ret == 0);}
+            if(i == (3 * ITERATIONS / 4)) {ret = print_env_to_file(e, "q3"); assert(ret == 0);}
 
-                ret = move(&e->list_ants[i]); assert(ret == 0);
-            }
+            ret = move(&e->list_ants[j]); assert(ret == 0);
         }
     }
     
-    else {
-        for(int i = 0; i < ITERATIONS; i++) {
-            for(int i = 0; i < AGENTS; i++) {            
-                ret = move(&e->list_ants[i]); assert(ret == 0);
-            }
-        }
-    }
-
     ret = print_env_to_file(e, "out"); assert(ret == 0);
     
     ret = destroy_env(e); assert(ret == 0);
