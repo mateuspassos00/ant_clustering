@@ -27,7 +27,7 @@ typedef struct position {
 
 typedef struct item {
     float data[2];    
-    enum item_type type; // <- NÃO EXISTE 
+    enum item_type type;
     position *pos;
     ant *carried; // se está sendo carregado por uma formiga ou não
 } item;
@@ -44,9 +44,7 @@ typedef struct ant {
     env *env; // importante para acessar os itens e construir lista com os itens próximos
 } ant;
 
-typedef struct cell {
-    // MUDAR: UMA CÉLULA PODE TER MAIS DE UMA FORMIGA
-    // atualmente, uma célula só tem a referência da última formiga que se moveu para ela
+typedef struct cell {    
     ant *ant;
     item *item;
 } cell;

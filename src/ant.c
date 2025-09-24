@@ -89,42 +89,13 @@ void drop_item(ant *ant) {
     int y = ant->pos->y;
 
     if (ant->carry != NULL && env->map[x][y].item == NULL) {
-        env->map[x][y].item = ant->carry;   // put item back into the map
-        ant->carry->pos->x = x;             // update item coordinates
+        env->map[x][y].item = ant->carry;   
+        ant->carry->pos->x = x;             
         ant->carry->pos->y = y;
-        ant->carry->carried = NULL;         // no longer carried
-        ant->carry = NULL;                  // ant no longer carrying
+        ant->carry->carried = NULL;         
+        ant->carry = NULL;                  
     }
 }
-
-
-// void drop_item(ant *ant) {
-//     env *env = ant->env;
-//     item *already_there;
-//     if((already_there = env->map[ant->pos->x][ant->pos->y].item) != NULL) {
-//         if(already_there->carried != NULL) return;
-//     }
-    
-//     env->map[ant->pos->x][ant->pos->y].item = ant->carry; // célula ganha a referência do item
-//     ant->carry->pos->x = ant->pos->x; // posição do item abandonado passa a ser a (última) posição da formiga
-//     ant->carry->pos->y = ant->pos->y;
-//     ant->carry->carried = NULL; // item perde a referência da formiga que o carrega
-//     ant->carry = NULL; // formiga perde a referência do item
-// }
-
-// void pick_item(ant *ant) {
-//     env *env = ant->env;
-//     int x = ant->pos->x;
-//     int y = ant->pos->y;
-
-//     item *it = env->map[x][y].item;
-//     if (it != NULL && ant->carry == NULL) {
-//         ant->carry = it;          // ant now carries the item
-//         it->carried = ant;        // item knows it's being carried
-//         env->map[x][y].item = NULL; // cell is now empty
-//     }
-// }
-
 
 void pick_up_item(ant *ant, item *candidate) {
     if (!ant || !candidate) return;
@@ -161,17 +132,13 @@ int move(ant *ant) {
             break;
     }
 
-    /* move ant in map: update ant pointer in map cells */
-    // remove reference from old cell if still pointing to this ant
     if (env->map[ant->pos->x][ant->pos->y].ant == ant)
         env->map[ant->pos->x][ant->pos->y].ant = NULL;
 
     ant->pos->x = r;
-    ant->pos->y = c;
-    // if there's another ant in destination, we just overwrite (or you can use list)
-    env->map[r][c].ant = ant;
-
-    /* check neighborhood */
+    ant->pos->y = c;    
+    env->map[r][c].ant = ant; // usar uma lista caso não se queira perder a referência
+    
     item_list *nearby_items = check_items(ant);
     float prob;
 
@@ -180,12 +147,11 @@ int move(ant *ant) {
         if (prob > 0.5f) {
             drop_item(ant);
         }
-    } else {
-        /* probabilistic pickup: for each nearby item, try picking based on pp */
+    } else {        
         for (int i = 0; i < nearby_items->size; i++) {
             float pp = prob_pickup(ant, nearby_items->items[i], nearby_items);
-            /* choose probabilistically */
-            float rrand = (float)rand() / (float)RAND_MAX;
+            // pegar/dropar probabilístico.. pode ser também escolhendo a prob máx
+            float rrand = (float)rand() / (float)RAND_MAX; // normalizando o número aleatório
             if (rrand < pp) {
                 pick_up_item(ant, nearby_items->items[i]);
                 break;
@@ -198,48 +164,3 @@ int move(ant *ant) {
 
     return 0;
 }
-
-// int move(ant *ant) {    
-//     if(ant == NULL) return -1;
-
-//     env *env = ant->env;    
-//     item *carrying = ant->carry;
-    
-//     ant->next_dir = rand() % sizeof(enum direcao);
-//     switch(ant->next_dir) {
-//         case UP: 
-//             ant->pos->x = mod(ant->pos->x - 1, env->rows); // atualizar a posição da formiga            
-//             break;
-//         case DOWN: 
-//             ant->pos->x = mod(ant->pos->x + 1, env->rows);
-//             break;
-//         case LEFT: 
-//             ant->pos->y = mod(ant->pos->y - 1, env->cols);
-//             break;
-//         case RIGHT:
-//             ant->pos->y = mod(ant->pos->y + 1, env->cols);
-//             break;
-//     }
-
-//     item_list *nearby_items = check_items(ant);
-//     float prob;
-//     if(carrying) {
-//         if ((prob = prob_drop(ant, nearby_items)) > 0.5) drop_item(ant);
-//     } else {
-//         float max_prob = 0;
-//         item *candidate = NULL;
-//         for(int i = 0; i < nearby_items->size; i++) {
-//             prob = prob_pickup(ant, nearby_items->items[i], nearby_items);
-//             if(prob > max_prob) {
-//                 max_prob = prob;
-//                 candidate = nearby_items->items[i];
-//             }
-//         }
-//         if(candidate) pick_up_item(ant, candidate);
-//     }
-
-//     free(nearby_items->items);
-//     free(nearby_items);
-
-//     return 0;
-// }
