@@ -2,5 +2,4 @@ default:
 	gcc -g -Wall src/*.c
 
 clean:
-	del a.exe
-	del /s /q "snapshots"
+	del a.exe	

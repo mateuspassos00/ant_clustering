@@ -4,8 +4,9 @@
 
 #define SAMPLE_SIZE 400
 
-float normalize(float z, float z_min, float z_max) {
-    return (z - z_min) / (z_max - z_min);
+float normalize(float z, float z_cap) {
+    if(z > 0) return z / z_cap;
+    else return - z / z_cap;
 }
 
 int main() {
@@ -34,11 +35,26 @@ int main() {
 
     fseek(fp, 0, 0);
 
-    FILE *out = fopen64("data\\base_4_grupos_norm.csv", "wt"); assert(out != NULL);
+    FILE *out = fopen64("data\\base_4_grupos_norm_neg.csv", "wt"); assert(out != NULL);
 
     for(int i = 0; i < SAMPLE_SIZE; i++) {
         fscanf(fp, "%f,%f,%d\n", &x, &y, &l);
-        fprintf(out, "%.6f,%.6f,%d\n", normalize(x, x_min, x_max), normalize(y, y_min, y_max), l);
+        switch (l) {
+        case 1:
+            fprintf(out, "%.6f,%.6f,%d\n", normalize(x, x_min), normalize(y, y_min), l);
+            break;
+        case 2:
+            fprintf(out, "%.6f,%.6f,%d\n", normalize(x, x_max), normalize(y, y_max), l);
+            break;
+        case 3:
+            fprintf(out, "%.6f,%.6f,%d\n", normalize(x, x_min), normalize(y, y_max), l);
+            break;
+        case 4:
+            fprintf(out, "%.6f,%.6f,%d\n", normalize(x, x_max), normalize(y, y_min), l);
+            break;
+        default:
+            break;
+        }
     }
     
     fclose(out);
