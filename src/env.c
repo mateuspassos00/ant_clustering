@@ -56,8 +56,8 @@ int distribute_itens(env *env) {
     int items_placed = 0;
 
     while(items_placed < env->num_items) {
-        int x = rand() % env->cols;
-        int y = rand() % env->rows;
+        int x = rand() % env->rows;
+        int y = rand() % env->cols;
         
         if(env->map[x][y].item == NULL) {                        
             env->map[x][y].item = &env->list_items[items_placed];                        
@@ -78,8 +78,8 @@ int distribute_ants(env *env) {
     int ants_placed = 0;
 
     while(ants_placed < env->num_ants) {
-        int x = rand() % env->cols;
-        int y = rand() % env->rows;
+        int x = rand() % env->rows;
+        int y = rand() % env->cols;
                 
         if(env->map[x][y].ant == NULL) {            
             env->map[x][y].ant = &env->list_ants[ants_placed];
