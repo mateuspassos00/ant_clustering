@@ -3,5 +3,6 @@
         "stdlib.h": "c",
         "ant_clustering.h": "c",
         "stdio.h": "c"
-    }
+    },
+    "makefile.configureOnOpen": true
 }
