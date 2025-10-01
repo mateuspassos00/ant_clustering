@@ -2,7 +2,9 @@
     "files.associations": {
         "stdlib.h": "c",
         "ant_clustering.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "time.h": "c",
+        "assert.h": "c"
     },
     "makefile.configureOnOpen": true
 }
