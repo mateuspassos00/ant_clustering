@@ -3,6 +3,13 @@
 #include <math.h>
 #include "ant_clustering.h"
 
+// ========================================================================================
+// CASO HOMOGÊNEO: prob_drop_simplified + f_function_simplified
+// 4 GRUPOS: prob_drop + f_function
+// 15 GRUPOS: 
+// ========================================================================================
+
+
 int mod(int a, int b) {
     return (a % b + b) % b;
 }
@@ -63,6 +70,19 @@ float f_function(ant* ant, item *item, item_list *nearby_items) {
     return f > 0 ? f : 0;
 }
 
+// caso homogêneo:
+// quanto maior a fração de itens percebidos (# itens / # celulas)
+// maior a chance de largar o item, o contrário também é verdade
+float f_function_simplified(ant* ant, item *item, item_list *nearby_items) {
+    env* e = ant->env;
+    float alpha = ant->env->alpha;
+    int num_cells = 2 * e->ant_los + 1;
+    // int num_cells = nearby_items->size;
+    num_cells *= num_cells;
+    
+    return nearby_items->size / num_cells;
+}
+
 float prob_pickup(ant *ant, item* item, item_list *nearby_items) {
     env *env = ant->env;
     
@@ -107,7 +127,7 @@ void drop_item(ant *ant) {
         ant->carry->pos->x = x;             
         ant->carry->pos->y = y;
         ant->carry->carried = NULL;         
-        ant->carry = NULL;                  
+        ant->carry = NULL;
     }
 }
 

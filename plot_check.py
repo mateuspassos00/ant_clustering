@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # ---- Config ----
-CSV_FILE = "snapshots_4/item_list.csv"  # change to your filename
+CSV_FILE = "snapshots_15/finish.csv"  # change to your filename
 
 # ---- Load ----
 df = pd.read_csv(CSV_FILE)
