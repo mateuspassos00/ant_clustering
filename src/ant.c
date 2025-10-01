@@ -50,8 +50,8 @@ float distance(item *i1, item *i2) {
 float f_function(ant* ant, item *item, item_list *nearby_items) {
     env* e = ant->env;
     float alpha = ant->env->alpha;
-    // int num_cells = 2 * e->ant_los + 1;
-    int num_cells = nearby_items->size;
+    int num_cells = 2 * e->ant_los + 1;
+    // int num_cells = nearby_items->size;
     num_cells *= num_cells;
     
     float sum = 0;
@@ -157,7 +157,7 @@ int move(ant *ant) {
     float prob;
 
     if (carrying) {
-        prob = prob_drop_simplified(ant, nearby_items);
+        prob = prob_drop(ant, nearby_items);
         float rrand = (float)rand() / (float)RAND_MAX;
         if (rrand < prob) {
             drop_item(ant);

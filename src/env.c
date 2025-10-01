@@ -159,6 +159,27 @@ int print_env_to_file(env *e, const char *path) {
     return 0;
 }
 
+int print_item_list(env *e, const char *path) {
+    if(e == NULL) return -1;
+
+    FILE *fp = fopen(path, "wt");
+    if(!fp) perror("erro ao criar/abrir arquivo para printar mapa");
+
+    fprintf(fp, "x,y,label\n");
+    
+    item* list = e->list_items;
+    for(int i = 0; i < e->num_items; i++) {
+        fprintf(fp, "%d,%d,%d\n",   list[i].pos->x,
+                                    list[i].pos->y,
+                                    list[i].type
+        );
+    }
+    
+    fclose(fp);
+
+    return 0;
+}
+
 void free_items(item *items, int num_items) {
     for(int i = 0; i < num_items; i++) free(items[i].pos);
     free(items);
@@ -176,7 +197,13 @@ void free_map(cell **map, int rows, int cols) {
 
 int destroy_env(env *e) {
     if(e == NULL) return -1;
-        
+
+    // int count = 0;
+    // for(int i = 0; i < e->num_items; i++) {
+    //     if(e->list_items[i].type + 1) count++;
+    // }
+    // printf("num items: %d\n", count);
+    
     free_ants(e->list_ants, e->num_ants);
     free_items(e->list_items, e->num_items);
     free_map(e->map, e->rows, e->cols);

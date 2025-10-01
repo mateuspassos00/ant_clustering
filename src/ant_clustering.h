@@ -62,6 +62,7 @@ env *create_env(int rows, int cols, int num_ants, int num_items, int ant_los, fl
 int move(ant *a); // escolhe próxima direção aleatóriamente
 int print_env(env *env);
 int print_env_to_file(env *env, const char *path);
+int print_item_list(env *env, const char *path);
 int destroy_env(env *env);
 
 #endif
