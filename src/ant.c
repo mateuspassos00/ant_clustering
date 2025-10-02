@@ -6,7 +6,7 @@
 // ========================================================================================
 // CASO HOMOGÊNEO: prob_drop_simplified + f_function_simplified
 // 4 GRUPOS: prob_drop + f_function
-// 15 GRUPOS: 
+// 15 GRUPOS: prob_drop + f_function
 // ========================================================================================
 
 
@@ -88,7 +88,7 @@ float prob_pickup(ant *ant, item* item, item_list *nearby_items) {
     
     float k_1 = env->k_1;
     
-    float pp = k_1 / (k_1 + f_function(ant, item, nearby_items));
+    float pp = k_1 / (k_1 + f_function_simplified(ant, item, nearby_items));
 
     return pp * pp;
 }
@@ -110,7 +110,7 @@ float prob_drop_simplified(ant *ant, item_list *nearby_items) {
     
     float k_2 = env->k_2;
     
-    float f = f_function(ant, item, nearby_items);
+    float f = f_function_simplified(ant, item, nearby_items);
 
     float pd = f / (k_2 + f);
     
@@ -177,7 +177,7 @@ int move(ant *ant) {
     float prob;
 
     if (carrying) {
-        prob = prob_drop(ant, nearby_items);
+        prob = prob_drop_simplified(ant, nearby_items);
         float rrand = (float)rand() / (float)RAND_MAX;
         if (rrand < prob) {
             drop_item(ant);

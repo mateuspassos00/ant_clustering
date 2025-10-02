@@ -1,6 +1,9 @@
 default:
 	gcc -g -Wall src/*.c
 
+clean_homo:
+	del /q "snapshots_homo/"	
+
 clean_4:
 	del /q "snapshots_4/"	
 

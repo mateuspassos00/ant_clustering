@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # ---- Config ----
-CSV_FILE = "snapshots_15/finish.csv"  # change to your filename
+CSV_FILE = "snapshots_homo/finish.csv"  # change to your filename
 
 # ---- Load ----
 df = pd.read_csv(CSV_FILE)
@@ -18,6 +18,6 @@ plt.title("Ant Clustering Visualization")
 plt.xlabel("X position")
 plt.ylabel("Y position")
 plt.gca().invert_yaxis()   # optional: makes grid look like a matrix
-plt.legend(title="Label")
+# plt.legend(title="Label")
 plt.grid(True, linestyle="--", alpha=0.5)
 plt.show()
